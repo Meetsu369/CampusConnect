@@ -117,6 +117,17 @@ function PageFallback() {
 // ---------------------------------------------------------------------------
 function AnimatedOutlet() {
   const location = useLocation();
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (prefersReduced) {
+    return (
+      <PageWrapper key={location.pathname}>
+        <Suspense fallback={<PageFallback />}>
+          <Outlet />
+        </Suspense>
+      </PageWrapper>
+    );
+  }
 
   return (
     <AnimatePresence mode="wait">
@@ -158,27 +169,20 @@ const router = createBrowserRouter(
           path="/events"
           element={
             <Suspense fallback={<PageFallback />}>
-              <EventsLayout />
+              <LazyEventsIndex />
             </Suspense>
           }
-        >
-          <Route
-            index
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <EmptyState />
-              </Suspense>
-            }
-          />
-          <Route
-            path=":eventId"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <LazyEventDetails />
-              </Suspense>
-            }
-          />
-        </Route>
+        />
+
+        <Route
+          path="/events/:eventId"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <LazyEventDetails />
+            </Suspense>
+          }
+        />
+
         <Route path="/events/:eventId/dashboard" element={<EventDashboard />} />
         {/* Events Map View with clustering */}
         <Route path="events/map" element={<EventsMapPage />} />
