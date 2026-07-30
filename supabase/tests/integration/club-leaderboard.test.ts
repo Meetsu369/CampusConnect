@@ -58,7 +58,7 @@ describe("Materialized View: Club Leaderboard", () => {
     // 4. Manually trigger the refresh command
     try {
       execSync(
-        'npx supabase db psql -c "REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_club_leaderboard;"',
+        'supabase db psql -c "REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_club_leaderboard;"',
       );
     } catch (e) {
       console.error("Failed to refresh materialized view:", e);
