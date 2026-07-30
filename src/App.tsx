@@ -96,7 +96,7 @@ const NotFound = lazy(() => import("./routes/NotFound"));
 const ChallengeArena = lazy(() => import("./routes/challenge"));
 const EventDashboard = lazy(() => import("./routes/events.$eventId.dashboard"));
 const Leaderboard = lazy(() =>
-  import("./components/Leaderboard").then((m) => ({ default: m.Leaderboard })),
+  import("./routes/leaderboard").then((m) => ({ default: m.LeaderboardPage })),
 );
 
 const EventsLayout = lazy(() => import("./pages/Events/EventsLayout"));
