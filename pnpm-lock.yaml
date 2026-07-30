@@ -406,7 +406,7 @@ importers:
         specifier: ^9.1.7
         version: 9.1.7
       jsdom:
-        specifier: ^27.3.0
+        specifier: ^27.4.0
         version: 27.4.0(supports-color@8.1.1)
       lint-staged:
         specifier: ^17.0.8
