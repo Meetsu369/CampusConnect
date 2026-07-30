@@ -15,10 +15,13 @@ describe("Materialized View: Club Leaderboard", () => {
     try {
       if (!anonKey || !serviceKey) {
         const statusStr = execSync("supabase status -o json", { encoding: "utf-8" });
-        const status = JSON.parse(statusStr);
-        anonKey = status.ANON_KEY;
-        serviceKey = status.SERVICE_ROLE_KEY;
-        apiUrl = status.API_URL;
+        const match = statusStr.match(/\{[\s\S]*\}/);
+        if (match) {
+          const status = JSON.parse(match[0]);
+          anonKey = status.ANON_KEY;
+          serviceKey = status.SERVICE_ROLE_KEY;
+          apiUrl = status.API_URL;
+        }
       }
     } catch (e) {
       console.warn("Could not fetch supabase status, falling back to dummies", e);
@@ -70,7 +73,16 @@ describe("Materialized View: Club Leaderboard", () => {
         'supabase db psql -c "REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_club_leaderboard;"',
       );
     } catch (e) {
-      console.error("Failed to refresh materialized view:", e);
+      console.warn("supabase cli failed to refresh, trying direct psql fallback...");
+      try {
+        // Fallback for CI environments where docker exec TTY might fail
+        execSync(
+          'psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -c "REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_club_leaderboard;"',
+        );
+      } catch (fallbackErr) {
+        console.error("Failed to refresh materialized view:", fallbackErr);
+        throw fallbackErr;
+      }
     }
 
     // 5. Query again (score should be updated, +10 for an event)
