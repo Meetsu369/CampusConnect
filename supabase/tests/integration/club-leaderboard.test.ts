@@ -7,16 +7,25 @@ describe("Materialized View: Club Leaderboard", () => {
   let serviceClient: SupabaseClient;
 
   beforeAll(() => {
-    supabase = createClient(
-      process.env.VITE_SUPABASE_URL || "http://127.0.0.1:54321",
-      process.env.VITE_SUPABASE_ANON_KEY || "dummy",
-    );
-    serviceClient = createClient(
-      process.env.VITE_SUPABASE_URL || "http://127.0.0.1:54321",
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-        process.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
-        "dummy",
-    );
+    let anonKey = process.env.VITE_SUPABASE_ANON_KEY;
+    let serviceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+    let apiUrl = process.env.VITE_SUPABASE_URL || "http://127.0.0.1:54321";
+
+    try {
+      if (!anonKey || !serviceKey) {
+        const statusStr = execSync("supabase status -o json", { encoding: "utf-8" });
+        const status = JSON.parse(statusStr);
+        anonKey = status.ANON_KEY;
+        serviceKey = status.SERVICE_ROLE_KEY;
+        apiUrl = status.API_URL;
+      }
+    } catch (e) {
+      console.warn("Could not fetch supabase status, falling back to dummies", e);
+    }
+
+    supabase = createClient(apiUrl, anonKey || "dummy");
+    serviceClient = createClient(apiUrl, serviceKey || "dummy");
   });
 
   it("caches aggregated scores and updates on refresh", async () => {
